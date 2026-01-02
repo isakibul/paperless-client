@@ -28,19 +28,40 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="auth-container">
-      <h1>Paperless System</h1>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-zinc-100 via-white to-zinc-200 dark:from-zinc-900 dark:via-black dark:to-zinc-800 px-6 font-sans">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl dark:bg-zinc-900">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+            Paperless
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Secure document & workflow system
+          </p>
+        </div>
 
-      {!role && <RoleSelector onSelect={setRole} />}
+        {/* Role selection */}
+        {!role && <RoleSelector onSelect={setRole} />}
 
-      {role && !mode && <AuthModeSelector onSelect={setMode} />}
+        {/* Login / Register selection */}
+        {role && !mode && <AuthModeSelector onSelect={setMode} />}
 
-      {role && mode && (
-        <>
-          <button onClick={() => setMode(null)}>← Back</button>
-          {renderForm()}
-        </>
-      )}
+        {/* Form */}
+        {role && mode && (
+          <div className="space-y-4">
+            <button
+              onClick={() => setMode(null)}
+              className="flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white transition"
+            >
+              ← Back
+            </button>
+
+            <div className="rounded-xl bg-zinc-50 p-6 dark:bg-zinc-800">
+              {renderForm()}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

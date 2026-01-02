@@ -2,8 +2,7 @@
 
 export default function AuthModeSelector({ onSelect }) {
   return (
-    <div className="selector">
-      <h2>Select action</h2>
+    <div>
       <button onClick={() => onSelect("login")}>Login</button>
       <button onClick={() => onSelect("register")}>Register</button>
     </div>
