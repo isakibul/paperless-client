@@ -1,15 +1,14 @@
 "use client";
 
-import AuthModeSelector from "@/components/auth/AuthModeSelector";
-import RoleSelector from "@/components/auth/RoleSelector";
 import { useState } from "react";
 
+import AuthModeSelector from "@/components/auth/AuthModeSelector";
+import RoleSelector from "@/components/auth/RoleSelector";
+
 import DeptLogin from "@/components/auth/forms/DepartmentLogin";
-import DeptRegister from "@/components/auth/forms/DepartmentRegister";
 import OrgLogin from "@/components/auth/forms/OrganizationLogin";
 import OrgRegister from "@/components/auth/forms/OrganizationRegister";
 import StaffLogin from "@/components/auth/forms/StaffLogin";
-import StaffRegister from "@/components/auth/forms/StaffRegister";
 
 export default function AuthPage() {
   const [role, setRole] = useState(null);
@@ -18,13 +17,21 @@ export default function AuthPage() {
   const renderForm = () => {
     if (!role || !mode) return null;
 
+    if (mode === "register" && role !== "org") {
+      return (
+        <p className="text-sm text-red-500 text-center">
+          Only organizations can register.
+        </p>
+      );
+    }
+
     const map = {
       org: { login: <OrgLogin />, register: <OrgRegister /> },
-      dept: { login: <DeptLogin />, register: <DeptRegister /> },
-      staff: { login: <StaffLogin />, register: <StaffRegister /> },
+      dept: { login: <DeptLogin /> },
+      staff: { login: <StaffLogin /> },
     };
 
-    return map[role][mode];
+    return map[role]?.[mode] || null;
   };
 
   return (
@@ -40,9 +47,14 @@ export default function AuthPage() {
         {!role && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-zinc-700 dark:text-zinc-300">
-              Who you are?
+              Who are you?
             </h2>
-            <RoleSelector onSelect={setRole} />
+            <RoleSelector
+              onSelect={(r) => {
+                setRole(r);
+                setMode(null);
+              }}
+            />
           </div>
         )}
 
@@ -56,7 +68,7 @@ export default function AuthPage() {
                 ? "Department"
                 : "Staff"}
             </h2>
-            <AuthModeSelector onSelect={setMode} />
+            <AuthModeSelector role={role} onSelect={setMode} />
             <button
               onClick={() => setRole(null)}
               className="text-sm text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition"
