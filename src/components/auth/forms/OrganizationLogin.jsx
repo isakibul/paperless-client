@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 
 const validationSchema = Yup.object({
@@ -17,6 +18,7 @@ const validationSchema = Yup.object({
 });
 
 export default function OrganizationLogin() {
+  const router = useRouter();
   return (
     <Formik
       initialValues={{
@@ -38,6 +40,8 @@ export default function OrganizationLogin() {
           );
 
           setStatus({ success: "Login successful" });
+
+          router.push("/dashboard/organization");
         } catch (error) {
           setStatus({
             error:
