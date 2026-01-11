@@ -13,9 +13,8 @@ export default function OrganizationDashboard() {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Add Department Card */}
           <button
-            onClick={() => router.push("/organization/departments/add")}
+            onClick={() => router.push("/pages/register/department")}
             className="flex flex-col items-start justify-between rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm transition hover:shadow-md hover:border-indigo-500"
           >
             <div>

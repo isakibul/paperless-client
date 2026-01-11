@@ -41,7 +41,7 @@ export default function OrganizationLogin() {
 
           setStatus({ success: "Login successful" });
 
-          router.push("/dashboard/organization");
+          router.push("/pages/dashboard/organization");
         } catch (error) {
           setStatus({
             error:
