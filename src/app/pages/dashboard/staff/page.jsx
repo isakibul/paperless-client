@@ -22,7 +22,7 @@ export default function StaffDashboard() {
       username: localStorage.getItem("username"),
       fullName: localStorage.getItem("fullName"),
       role: localStorage.getItem("role"),
-      deptId: localStorage.getItem("deptId"),
+      departmentId: localStorage.getItem("departmentId"),
       departmentName: localStorage.getItem("departmentName"),
       organizationId: localStorage.getItem("organizationId"),
       organizationName: localStorage.getItem("organizationName"),
@@ -30,7 +30,9 @@ export default function StaffDashboard() {
 
     setStaff(staffData);
 
-    // Fetch organization name
+    /**
+     * Fetch organization name
+     */
     axios
       .get(
         `http://localhost:5000/api/v1/organization/${staffData.organizationId}`,
@@ -50,6 +52,8 @@ export default function StaffDashboard() {
   if (loading) {
     return <p className="text-center mt-10">Loading dashboard...</p>;
   }
+
+  console.log(staff);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 px-6 py-10">
@@ -84,7 +88,7 @@ export default function StaffDashboard() {
               <strong>Name:</strong> {staff.departmentName}
             </p>
             <p>
-              <strong>ID:</strong> {staff.deptId}
+              <strong>ID:</strong> {staff.departmentId}
             </p>
           </div>
 

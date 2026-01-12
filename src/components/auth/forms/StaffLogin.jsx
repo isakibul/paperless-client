@@ -33,16 +33,19 @@ export default function StaffLogin() {
             );
 
             const data = res.data.data;
-            console.log(data.token);
+            console.log(data);
 
             localStorage.setItem("token", data.token);
             localStorage.setItem("staffId", data.id);
             localStorage.setItem("username", data.username);
             localStorage.setItem("fullName", data.fullName);
             localStorage.setItem("role", data.role);
-            localStorage.setItem("deptId", data.deptId);
+            localStorage.setItem("departmentId", data.departmentId);
             localStorage.setItem("departmentName", data.departmentName);
             localStorage.setItem("organizationId", data.organizationId);
+            localStorage.setItem("organizationName", data.organizationName);
+
+            console.log(data.organizationName);
 
             setStatus({ success: "Login successful" });
 
