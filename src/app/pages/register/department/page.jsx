@@ -41,7 +41,7 @@ export default function DepartmentRegister() {
               const token = localStorage.getItem("token");
 
               const res = await axios.post(
-                "http://localhost:000/api/v1/auth/department-register",
+                "http://localhost:5000/api/v1/auth/department-register",
                 values,
                 {
                   headers: {
@@ -50,17 +50,13 @@ export default function DepartmentRegister() {
                 }
               );
 
-              console.log(res);
-
-              toast.success("Department created successfully");
+              toast.success(res.data.message);
               resetForm();
             } catch (error) {
               const message =
                 error.response?.data?.message || "Something went wrong";
 
               toast.error(message);
-
-              setStatus({ error: message });
             } finally {
               setSubmitting(false);
             }

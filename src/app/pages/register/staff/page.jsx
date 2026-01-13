@@ -47,7 +47,7 @@ export default function StaffRegister() {
                 }
               );
 
-              toast.success("Staff registered successfully");
+              toast.success(res.data.message);
               resetForm();
             } catch (error) {
               const message =
