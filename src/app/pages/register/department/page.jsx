@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import toast from "react-hot-toast";
 import * as Yup from "yup";
 
 const validationSchema = Yup.object({
@@ -40,7 +41,7 @@ export default function DepartmentRegister() {
               const token = localStorage.getItem("token");
 
               const res = await axios.post(
-                "http://localhost:5000/api/v1/auth/department-register",
+                "http://localhost:000/api/v1/auth/department-register",
                 values,
                 {
                   headers: {
@@ -49,21 +50,23 @@ export default function DepartmentRegister() {
                 }
               );
 
-              console.log("Department created:", res.data);
-              setStatus({ success: "Department created successfully" });
+              console.log(res);
+
+              toast.success("Department created successfully");
               resetForm();
             } catch (error) {
-              setStatus({
-                error:
-                  error.response?.data?.message ||
-                  "Failed to create department",
-              });
+              const message =
+                error.response?.data?.message || "Something went wrong";
+
+              toast.error(message);
+
+              setStatus({ error: message });
             } finally {
               setSubmitting(false);
             }
           }}
         >
-          {({ isSubmitting, status }) => (
+          {({ isSubmitting }) => (
             <Form className="space-y-4">
               <h3 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 text-center">
                 Register Department
@@ -123,18 +126,6 @@ export default function DepartmentRegister() {
                   className="mt-1 text-xs text-red-500"
                 />
               </div>
-
-              {status?.error && (
-                <p className="text-xs text-red-500 text-center">
-                  {status.error}
-                </p>
-              )}
-
-              {status?.success && (
-                <p className="text-xs text-green-500 text-center">
-                  {status.success}
-                </p>
-              )}
 
               <button
                 type="submit"

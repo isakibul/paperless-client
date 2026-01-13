@@ -1,4 +1,5 @@
 import { Space_Grotesk } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -15,7 +16,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={spaceGrotesk.variable}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

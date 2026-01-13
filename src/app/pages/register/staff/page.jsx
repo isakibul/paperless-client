@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import toast from "react-hot-toast";
 import * as Yup from "yup";
 
 const validationSchema = Yup.object({
@@ -32,7 +33,7 @@ export default function StaffRegister() {
             role: "Staff",
           }}
           validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting, resetForm, setStatus }) => {
+          onSubmit={async (values, { setSubmitting, resetForm }) => {
             try {
               const token = localStorage.getItem("token");
 
@@ -46,20 +47,19 @@ export default function StaffRegister() {
                 }
               );
 
-              console.log("Staff created:", res.data);
-              setStatus({ success: "Staff registered successfully" });
+              toast.success("Staff registered successfully");
               resetForm();
             } catch (error) {
-              setStatus({
-                error:
-                  error.response?.data?.message || "Failed to register staff",
-              });
+              const message =
+                error.response?.data?.message || "Something went wrong";
+
+              toast.error(message);
             } finally {
               setSubmitting(false);
             }
           }}
         >
-          {({ isSubmitting, status }) => (
+          {({ isSubmitting }) => (
             <Form className="space-y-4">
               <h3 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 text-center">
                 Register Staff
@@ -120,18 +120,6 @@ export default function StaffRegister() {
                   className="mt-1 text-xs text-red-500"
                 />
               </div>
-
-              {status?.error && (
-                <p className="text-xs text-red-500 text-center">
-                  {status.error}
-                </p>
-              )}
-
-              {status?.success && (
-                <p className="text-xs text-green-500 text-center">
-                  {status.success}
-                </p>
-              )}
 
               <button
                 type="submit"
