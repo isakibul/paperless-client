@@ -36,7 +36,7 @@ export default function DepartmentRegister() {
             password: "",
           }}
           validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting, resetForm, setStatus }) => {
+          onSubmit={async (values, { setSubmitting, resetForm }) => {
             try {
               const token = localStorage.getItem("token");
 
