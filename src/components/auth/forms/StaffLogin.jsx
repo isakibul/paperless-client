@@ -33,7 +33,6 @@ export default function StaffLogin() {
             );
 
             const data = res.data.data;
-            console.log(data);
 
             localStorage.setItem("token", data.token);
             localStorage.setItem("staffId", data.id);
@@ -44,8 +43,6 @@ export default function StaffLogin() {
             localStorage.setItem("departmentName", data.departmentName);
             localStorage.setItem("organizationId", data.organizationId);
             localStorage.setItem("organizationName", data.organizationName);
-
-            console.log(data.organizationName);
 
             setStatus({ success: "Login successful" });
 
