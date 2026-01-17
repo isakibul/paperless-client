@@ -34,16 +34,6 @@ export default function StaffLogin() {
 
             const data = res.data.data;
 
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("staffId", data.id);
-            localStorage.setItem("username", data.username);
-            localStorage.setItem("fullName", data.fullName);
-            localStorage.setItem("role", data.role);
-            localStorage.setItem("departmentId", data.departmentId);
-            localStorage.setItem("departmentName", data.departmentName);
-            localStorage.setItem("organizationId", data.organizationId);
-            localStorage.setItem("organizationName", data.organizationName);
-
             setStatus({ success: "Login successful" });
 
             router.push("/pages/dashboard/staff");
