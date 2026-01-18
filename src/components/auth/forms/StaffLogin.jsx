@@ -29,10 +29,8 @@ export default function StaffLogin() {
           try {
             const res = await axios.post(
               "http://localhost:5000/api/v1/auth/staff-login",
-              values
+              values,
             );
-
-            const data = res.data.data;
 
             setStatus({ success: "Login successful" });
 
