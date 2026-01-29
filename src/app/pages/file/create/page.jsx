@@ -1,12 +1,109 @@
 "use client";
 import { Extension } from "@tiptap/core";
 import FontFamily from "@tiptap/extension-font-family";
+import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+// Custom Resizable Image Extension
+const ResizableImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+        renderHTML: (attributes) => {
+          return {
+            width: attributes.width,
+          };
+        },
+      },
+      height: {
+        default: null,
+        renderHTML: (attributes) => {
+          return {
+            height: attributes.height,
+          };
+        },
+      },
+    };
+  },
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey("imageResize"),
+        props: {
+          handleDOMEvents: {
+            mousedown(view, event) {
+              const target = event.target;
+              if (target.nodeName === "IMG") {
+                const pos = view.posAtDOM(target, 0);
+                const node = view.state.doc.nodeAt(pos);
+
+                if (node && node.type.name === "image") {
+                  const startX = event.clientX;
+                  const startY = event.clientY;
+                  const startWidth = target.offsetWidth;
+                  const startHeight = target.offsetHeight;
+
+                  const onMouseMove = (e) => {
+                    const diffX = e.clientX - startX;
+                    const diffY = e.clientY - startY;
+
+                    // Calculate new dimensions while maintaining aspect ratio
+                    const aspectRatio = startWidth / startHeight;
+                    let newWidth = startWidth + diffX;
+                    let newHeight = newWidth / aspectRatio;
+
+                    // Minimum size
+                    if (newWidth < 50) newWidth = 50;
+                    if (newHeight < 50) newHeight = 50;
+
+                    target.style.width = `${newWidth}px`;
+                    target.style.height = `${newHeight}px`;
+                  };
+
+                  const onMouseUp = (e) => {
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
+
+                    const newWidth = parseInt(target.style.width);
+                    const newHeight = parseInt(target.style.height);
+
+                    const { tr } = view.state;
+                    tr.setNodeMarkup(pos, null, {
+                      ...node.attrs,
+                      width: newWidth,
+                      height: newHeight,
+                    });
+                    view.dispatch(tr);
+                  };
+
+                  if (
+                    event.offsetX > target.offsetWidth - 20 &&
+                    event.offsetY > target.offsetHeight - 20
+                  ) {
+                    event.preventDefault();
+                    document.addEventListener("mousemove", onMouseMove);
+                    document.addEventListener("mouseup", onMouseUp);
+                    return true;
+                  }
+                }
+              }
+              return false;
+            },
+          },
+        },
+      }),
+    ];
+  },
+});
 
 // Custom FontSize extension
 const FontSize = Extension.create({
@@ -59,10 +156,14 @@ const FontSize = Extension.create({
   },
 });
 
-function Toolbar({ editor }) {
+function Toolbar({ editor, imageInputRef }) {
   if (!editor) return null;
 
   const [fontSize, setFontSize] = useState(11);
+
+  const handleImageClick = () => {
+    imageInputRef.current?.click();
+  };
 
   const increaseFontSize = () => {
     const newSize = fontSize + 1;
@@ -342,6 +443,29 @@ function Toolbar({ editor }) {
             />
           </svg>
         </button>
+
+        <div className={separator} />
+
+        {/* Image Upload */}
+        <button
+          onClick={handleImageClick}
+          className={btn(false)}
+          title="Insert image"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   );
@@ -349,6 +473,21 @@ function Toolbar({ editor }) {
 
 export default function FileCreatePage() {
   const [title, setTitle] = useState("Untitled document");
+  const imageInputRef = useRef(null);
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const src = e.target?.result;
+        if (src && editor) {
+          editor.chain().focus().setImage({ src }).run();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const editor = useEditor({
     extensions: [
@@ -359,6 +498,13 @@ export default function FileCreatePage() {
       FontSize,
       TextAlign.configure({
         types: ["heading", "paragraph"],
+      }),
+      ResizableImage.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: "resizable-image",
+        },
       }),
     ],
     content: `
@@ -389,7 +535,7 @@ export default function FileCreatePage() {
       </div>
 
       {/* Toolbar */}
-      <Toolbar editor={editor} />
+      <Toolbar editor={editor} imageInputRef={imageInputRef} />
 
       {/* Editor Container */}
       <div className="max-w-5xl mx-auto py-12 px-4">
@@ -397,6 +543,15 @@ export default function FileCreatePage() {
           <EditorContent editor={editor} className="min-h-full" />
         </div>
       </div>
+
+      {/* Hidden Image Input */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="hidden"
+      />
 
       {/* Custom Editor Styles */}
       <style jsx global>{`
@@ -407,6 +562,53 @@ export default function FileCreatePage() {
           font-size: 11pt;
           line-height: 1.5;
           color: #000;
+        }
+
+        .ProseMirror img {
+          max-width: 100%;
+          height: auto;
+          cursor: move;
+          border: 2px solid transparent;
+          transition: border-color 0.2s;
+          display: inline-block;
+          position: relative;
+          user-select: none;
+        }
+
+        .ProseMirror img:hover {
+          border-color: #3b82f6;
+        }
+
+        .ProseMirror img.ProseMirror-selectednode {
+          outline: 3px solid #3b82f6;
+          border-color: transparent;
+        }
+
+        /* Resize handle indicator */
+        .ProseMirror img.ProseMirror-selectednode::after {
+          content: "";
+          position: absolute;
+          right: -2px;
+          bottom: -2px;
+          width: 12px;
+          height: 12px;
+          background: #3b82f6;
+          border: 2px solid white;
+          cursor: nwse-resize;
+          border-radius: 2px;
+        }
+
+        .ProseMirror img:hover::after {
+          content: "";
+          position: absolute;
+          right: -2px;
+          bottom: -2px;
+          width: 12px;
+          height: 12px;
+          background: #93c5fd;
+          border: 2px solid white;
+          cursor: nwse-resize;
+          border-radius: 2px;
         }
 
         .ProseMirror h1 {
