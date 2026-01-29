@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 
 const validationSchema = Yup.object({
@@ -29,6 +30,7 @@ const validationSchema = Yup.object({
 });
 
 export default function OrganizationRegister() {
+  const router = useRouter();
   return (
     <Formik
       initialValues={{
@@ -43,13 +45,14 @@ export default function OrganizationRegister() {
         try {
           await axios.post(
             "http://localhost:5000/api/v1/auth/organization-register",
-            values
+            values,
           );
           resetForm();
+          router.push("/pages/organization/organization-success");
         } catch (error) {
           console.error(
             "Registration failed:",
-            error.response?.data || error.message
+            error.response?.data || error.message,
           );
         } finally {
           setSubmitting(false);
