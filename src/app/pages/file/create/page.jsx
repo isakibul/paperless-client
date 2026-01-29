@@ -507,9 +507,7 @@ export default function FileCreatePage() {
         },
       }),
     ],
-    content: `
-      <p>Start writing your document here...</p>
-    `,
+    content: ``,
     immediatelyRender: false,
     editorProps: {
       attributes: {
