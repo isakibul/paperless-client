@@ -8,10 +8,8 @@ import Underline from "@tiptap/extension-underline";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-// Custom Resizable Image Extension
 const ResizableImage = Image.extend({
   addAttributes() {
     return {
@@ -57,12 +55,10 @@ const ResizableImage = Image.extend({
                     const diffX = e.clientX - startX;
                     const diffY = e.clientY - startY;
 
-                    // Calculate new dimensions while maintaining aspect ratio
                     const aspectRatio = startWidth / startHeight;
                     let newWidth = startWidth + diffX;
                     let newHeight = newWidth / aspectRatio;
 
-                    // Minimum size
                     if (newWidth < 50) newWidth = 50;
                     if (newHeight < 50) newHeight = 50;
 
@@ -106,7 +102,6 @@ const ResizableImage = Image.extend({
   },
 });
 
-// Custom FontSize extension
 const FontSize = Extension.create({
   name: "fontSize",
 
@@ -193,7 +188,6 @@ function Toolbar({ editor, imageInputRef }) {
   return (
     <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
       <div className="flex items-center gap-1 px-4 py-2 overflow-x-auto">
-        {/* Undo/Redo */}
         <button
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
@@ -237,7 +231,6 @@ function Toolbar({ editor, imageInputRef }) {
 
         <div className={separator} />
 
-        {/* Text Formatting */}
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={btn(editor.isActive("bold"))}
@@ -269,7 +262,6 @@ function Toolbar({ editor, imageInputRef }) {
 
         <div className={separator} />
 
-        {/* Headings */}
         <select
           onChange={(e) => {
             const value = e.target.value;
@@ -302,7 +294,6 @@ function Toolbar({ editor, imageInputRef }) {
 
         <div className={separator} />
 
-        {/* Font Family */}
         <select
           onChange={(e) => {
             if (e.target.value === "default") {
@@ -327,7 +318,6 @@ function Toolbar({ editor, imageInputRef }) {
 
         <div className={separator} />
 
-        {/* Font Size */}
         <div className="flex items-center gap-1">
           <button
             onClick={decreaseFontSize}
@@ -361,7 +351,6 @@ function Toolbar({ editor, imageInputRef }) {
 
         <div className={separator} />
 
-        {/* Lists */}
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={btn(editor.isActive("bulletList"))}
@@ -391,7 +380,6 @@ function Toolbar({ editor, imageInputRef }) {
 
         <div className={separator} />
 
-        {/* Alignment */}
         <button
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
           className={btn(editor.isActive({ textAlign: "left" }))}
@@ -447,7 +435,6 @@ function Toolbar({ editor, imageInputRef }) {
 
         <div className={separator} />
 
-        {/* Image Upload */}
         <button
           onClick={handleImageClick}
           className={btn(false)}
@@ -475,10 +462,6 @@ function Toolbar({ editor, imageInputRef }) {
 export default function FileCreatePage() {
   const [title, setTitle] = useState("Untitled document");
   const imageInputRef = useRef(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState(null);
-  const [targetDepartments, setTargetDepartments] = useState([]);
-  const router = useRouter();
 
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
@@ -522,61 +505,18 @@ export default function FileCreatePage() {
     },
   });
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!editor) return;
 
-    setIsSaving(true);
-    setError(null);
+    const content = editor.getJSON();
+    console.log("Document Title:", title);
+    console.log("Document Content:", content);
 
-    try {
-      const content = editor.getJSON();
-
-      const organizationId = "16662b6a-a48b-4015-9cd3-6a8a9fdb9297";
-      const departmentId = "7c1c3efc-c25b-4d13-83ad-638a2d9f9697";
-      const staffId = "7c1c3efc-c25b-4d13-83ad-638a2d9f9697";
-
-      const payload = {
-        title,
-        content: JSON.stringify(content), // Backend expects stringified JSON
-        organizationId,
-        departmentId,
-        staffId,
-        targetDepartments, // Array of department IDs to route the file to
-      };
-
-      const response = await fetch("http://localhost:5000/api/v1/file/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Add authorization header if needed
-          // 'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create file");
-      }
-
-      if (data.success) {
-        console.log("File created successfully:", data.fileId);
-        // Redirect to department archive
-        router.push("/pages/organization/archive");
-      } else {
-        throw new Error(data.message || "Failed to create file");
-      }
-    } catch (err) {
-      console.error("Save error:", err);
-      setError(err.message || "Failed to save file");
-      setIsSaving(false);
-    }
+    alert("Document saved! Check console for content.");
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Top Bar */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <input
@@ -588,36 +528,24 @@ export default function FileCreatePage() {
           />
 
           <div className="flex items-center gap-2">
-            {error && (
-              <span className="text-sm text-red-600 mr-2">{error}</span>
-            )}
             <button
               onClick={handleSave}
-              disabled={isSaving}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium border transition
-        ${
-          isSaving
-            ? "bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
-            : "bg-blue-600 text-white border-blue-600 hover:bg-blue-700"
-        }`}
+              className="px-4 py-1.5 rounded-md text-sm font-medium border bg-blue-600 text-white border-blue-600 hover:bg-blue-700 transition"
             >
-              {isSaving ? "Saving..." : "Save"}
+              Save
             </button>
           </div>
         </div>
       </div>
 
-      {/* Toolbar */}
       <Toolbar editor={editor} imageInputRef={imageInputRef} />
 
-      {/* Editor Container */}
       <div className="max-w-5xl mx-auto py-12 px-4">
         <div className="bg-white shadow-lg min-h-[1056px] p-16">
           <EditorContent editor={editor} className="min-h-full" />
         </div>
       </div>
 
-      {/* Hidden Image Input */}
       <input
         ref={imageInputRef}
         type="file"
@@ -626,7 +554,6 @@ export default function FileCreatePage() {
         className="hidden"
       />
 
-      {/* Custom Editor Styles */}
       <style jsx global>{`
         .ProseMirror {
           outline: none;
@@ -657,7 +584,6 @@ export default function FileCreatePage() {
           border-color: transparent;
         }
 
-        /* Resize handle indicator */
         .ProseMirror img.ProseMirror-selectednode::after {
           content: "";
           position: absolute;
