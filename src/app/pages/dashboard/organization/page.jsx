@@ -18,7 +18,7 @@ const actions = [
     title: "File Archive",
     description:
       "View file that have been archived or in action in our organization.",
-    path: "/pages/department/archive",
+    path: "/pages/organization/archive",
   },
 ];
 

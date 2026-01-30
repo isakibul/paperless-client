@@ -1,27 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+const DUMMY_DEPARTMENTS = [
+  {
+    id: 1,
+    departmentName: "Department of Computer Science & Engineering",
+    departmentUsername: "cse",
+    about:
+      "Focuses on computer programming, software engineering, artificial intelligence, and research in computing technologies.",
+    createdAt: "2024-02-12",
+  },
+  {
+    id: 2,
+    departmentName: "Department of Electrical & Electronic Engineering",
+    departmentUsername: "eee",
+    about:
+      "Dedicated to power systems, electronics, communication engineering, and practical industrial applications.",
+    createdAt: "2024-02-15",
+  },
+  {
+    id: 3,
+    departmentName: "Department of Civil Engineering",
+    departmentUsername: "ce",
+    about:
+      "Covers structural engineering, transportation, environmental engineering, and infrastructure development.",
+    createdAt: "2024-02-18",
+  },
+  {
+    id: 4,
+    departmentName: "Department of Business Administration",
+    departmentUsername: "bba",
+    about:
+      "Provides education in management, accounting, marketing, finance, and entrepreneurship.",
+    createdAt: "2024-02-20",
+  },
+  {
+    id: 5,
+    departmentName: "Department of Law",
+    departmentUsername: "law",
+    about:
+      "Offers legal education focusing on constitutional law, criminal law, and justice system studies.",
+    createdAt: "2024-02-22",
+  },
+  {
+    id: 6,
+    departmentName: "Department of English",
+    departmentUsername: "english",
+    about:
+      "Emphasizes literature, linguistics, communication skills, and critical thinking.",
+    createdAt: "2024-02-25",
+  },
+];
 
 export default function DepartmentListPage() {
-  const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true);
-
+  const [departments, setDepartments] = useState(DUMMY_DEPARTMENTS);
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedDept, setSelectedDept] = useState(null);
-
-  const fetchDepartments = async () => {
-    try {
-      const res = await fetch(
-        "http://localhost:5000/api/v1/department/departments",
-      );
-      const data = await res.json();
-      setDepartments(data.data || []);
-    } catch (error) {
-      console.error("Failed to fetch departments", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const openConfirm = (dept) => {
     setSelectedDept(dept);
@@ -33,30 +68,15 @@ export default function DepartmentListPage() {
     setSelectedDept(null);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!selectedDept) return;
 
-    try {
-      await fetch(
-        `http://localhost:5000/api/v1/department/departments/${selectedDept.id}`,
-        {
-          method: "DELETE",
-        },
-      );
+    setDepartments((prev) =>
+      prev.filter((dept) => dept.id !== selectedDept.id),
+    );
 
-      setDepartments((prev) =>
-        prev.filter((dept) => dept.id !== selectedDept.id),
-      );
-
-      closeConfirm();
-    } catch (error) {
-      console.error("Failed to delete department", error);
-    }
+    closeConfirm();
   };
-
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
 
   return (
     <>
@@ -66,9 +86,7 @@ export default function DepartmentListPage() {
             Department List
           </h1>
 
-          {loading ? (
-            <p className="text-zinc-500">Loading departments...</p>
-          ) : departments.length === 0 ? (
+          {departments.length === 0 ? (
             <p className="text-zinc-500">No departments found.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -86,11 +104,11 @@ export default function DepartmentListPage() {
                       @{dept.departmentUsername}
                     </p>
 
-                    {dept.about && (
+                    {/* {dept.about && (
                       <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
                         {dept.about}
                       </p>
-                    )}
+                    )} */}
                   </div>
 
                   <div className="mt-6 flex items-center justify-between">
