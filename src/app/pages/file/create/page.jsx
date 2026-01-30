@@ -8,6 +8,7 @@ import Underline from "@tiptap/extension-underline";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 // Custom Resizable Image Extension
@@ -474,6 +475,10 @@ function Toolbar({ editor, imageInputRef }) {
 export default function FileCreatePage() {
   const [title, setTitle] = useState("Untitled document");
   const imageInputRef = useRef(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [targetDepartments, setTargetDepartments] = useState([]);
+  const router = useRouter();
 
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
@@ -517,11 +522,66 @@ export default function FileCreatePage() {
     },
   });
 
+  const handleSave = async () => {
+    if (!editor) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      // Get JSON content from editor
+      const content = editor.getJSON();
+
+      // TODO: Replace these with actual values from your auth/context
+      // You should get these from your authentication system
+      const organizationId = 1; // Replace with actual org ID
+      const departmentId = 1; // Replace with actual department ID
+      const staffId = 1; // Replace with actual staff ID
+
+      const payload = {
+        title,
+        content: JSON.stringify(content), // Backend expects stringified JSON
+        organizationId,
+        departmentId,
+        staffId,
+        targetDepartments, // Array of department IDs to route the file to
+      };
+
+      const response = await fetch("http://localhost:5000/api/v1/file/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Add authorization header if needed
+          // 'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create file");
+      }
+
+      if (data.success) {
+        console.log("File created successfully:", data.fileId);
+        // Redirect to department archive
+        router.push("/department/archive");
+      } else {
+        throw new Error(data.message || "Failed to create file");
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+      setError(err.message || "Failed to save file");
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Top Bar */}
       <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <input
             type="text"
             value={title}
@@ -529,6 +589,24 @@ export default function FileCreatePage() {
             className="text-lg font-normal outline-none border-none w-full text-gray-900 placeholder-gray-400 focus:outline-none"
             placeholder="Untitled document"
           />
+
+          <div className="flex items-center gap-2">
+            {error && (
+              <span className="text-sm text-red-600 mr-2">{error}</span>
+            )}
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium border transition
+        ${
+          isSaving
+            ? "bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
+            : "bg-blue-600 text-white border-blue-600 hover:bg-blue-700"
+        }`}
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </button>
+          </div>
         </div>
       </div>
 
