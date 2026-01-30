@@ -529,14 +529,11 @@ export default function FileCreatePage() {
     setError(null);
 
     try {
-      // Get JSON content from editor
       const content = editor.getJSON();
 
-      // TODO: Replace these with actual values from your auth/context
-      // You should get these from your authentication system
-      const organizationId = 1; // Replace with actual org ID
-      const departmentId = 1; // Replace with actual department ID
-      const staffId = 1; // Replace with actual staff ID
+      const organizationId = "16662b6a-a48b-4015-9cd3-6a8a9fdb9297";
+      const departmentId = "7c1c3efc-c25b-4d13-83ad-638a2d9f9697";
+      const staffId = "7c1c3efc-c25b-4d13-83ad-638a2d9f9697";
 
       const payload = {
         title,
@@ -566,7 +563,7 @@ export default function FileCreatePage() {
       if (data.success) {
         console.log("File created successfully:", data.fileId);
         // Redirect to department archive
-        router.push("/department/archive");
+        router.push("/pages/organization/archive");
       } else {
         throw new Error(data.message || "Failed to create file");
       }
